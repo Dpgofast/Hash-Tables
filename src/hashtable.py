@@ -1,11 +1,14 @@
 # '''
 # Linked List hash table key/value pair
 # '''
+
+
 class LinkedPair:
     def __init__(self, key, value):
         self.key = key
         self.value = value
         self.next = None
+
 
 class HashTable:
     '''
@@ -15,7 +18,8 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
         self.storage = [None] * capacity
-
+        self.count = capacity
+        self.head = None
 
     def _hash(self, key):
         '''
@@ -25,7 +29,6 @@ class HashTable:
         '''
         return hash(key)
 
-
     def _hash_djb2(self, key):
         '''
         Hash an arbitrary key using DJB2 hash
@@ -34,7 +37,6 @@ class HashTable:
         '''
         pass
 
-
     def _hash_mod(self, key):
         '''
         Take an arbitrary key and return a valid integer index
@@ -42,18 +44,40 @@ class HashTable:
         '''
         return self._hash(key) % self.capacity
 
-
     def insert(self, key, value):
         '''
         Store the value with the given key.
 
         Hash collisions should be handled with Linked List Chaining.
 
-        Fill this in.
         '''
-        pass
+        # THIS SHOULD WORK!?!?!?!?!!
+        # index = self._hash_mod(key)
 
+        # if self.storage[index] is not None:
+        #     current = self.storage[index]
+        #     exists = False
+        #     while current and not exists:
+        #         if current.key == key:
+        #             current.value = value
+        #             exists = True
+        #         elif current.next is None:
+        #             current.next = LinkedPair(key, value)
+        #             exists = True
+        # self.storage[index] = LinkedPair(key, value)
 
+        # alternate attempt
+        index = self._hash_mod(key)
+        current = self.storage[index]  # pair at current index
+        last = None  # pair to insert
+        # if position attempted is occupied and not the same entry
+        # collision and need to shift
+        while current is not None and current.key is not key:
+            last = current  # set last = to current for insertion
+            current = last.next  # set current to point to pair next to last
+        new = LinkedPair(key, value)
+        new.next = self.storage[index]
+        self.storage[index] = new
 
     def remove(self, key):
         '''
@@ -61,31 +85,48 @@ class HashTable:
 
         Print a warning if the key is not found.
 
-        Fill this in.
         '''
-        pass
-
+        index = self._hash_mod(key)
+        current = self.storage[index]
+        prev = None
+        while current is not None and current.key is not key:
+            prev = current
+            current = prev.next
+        if current is None:
+            print('Nothing to remove')
+        else:
+            if prev is None:
+                self.storage[index] = current.next
+            else:
+                prev.next = current.next
 
     def retrieve(self, key):
         '''
         Retrieve the value stored with the given key.
 
         Returns None if the key is not found.
-
-        Fill this in.
         '''
-        pass
-
+        index = self._hash_mod(key)
+        current = self.storage[index]
+        while current is not None:
+            if current.key == key:
+                return current.value
+            current = current.next
 
     def resize(self):
         '''
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
-        Fill this in.
         '''
-        pass
-
+        self.capacity *= 2
+        new_storage = HashTable(self.capacity)
+        for item in self.storage:
+            current = item
+            while current is not None:
+                new_storage.insert(current.key, current.value)
+                current = current.next
+        self.storage = new_storage.storage
 
 
 if __name__ == "__main__":
